@@ -25,23 +25,25 @@ import { getAllScore } from "@/apis/common";
 
 function createData(
   student_name: string,
+  all: number,
   language: number,
   math: number,
   english: number,
   physics: number,
   chemistry: number,
   biology: number,
-  all: number
+
 ): StudentScore {
   return {
     student_name,
+    all,
     language,
     math,
     english,
     physics,
     chemistry,
     biology,
-    all,
+
   };
 }
 
@@ -242,7 +244,7 @@ export default function ScoreTable() {
   const { data, refetch } = useQuery(
     //从state中获取exam_id，请求获得所有学生成绩
     ["getScore"],
-    () => getAllScore([state.selectedExamId]),
+    () => getAllScore({exam_id:state.selectedExamId}),
     {
       onSuccess: (data: any) => {
         const newRows = data.allScore.map((srow: StudentScore) =>
@@ -257,13 +259,11 @@ export default function ScoreTable() {
             srow.biology
           )
         );
+        console.log(data.allScore)
         setRows([...newRows]);
       },
     }
   );
-  useEffect(() => {
-    console.log(rows);
-  }, [rows]);
   const handleRequestSort = (
     event: React.MouseEvent<unknown>,
     property: keyof StudentScore
