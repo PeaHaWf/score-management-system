@@ -1,10 +1,7 @@
 import {
-  Exam,
-  LoginInfo,
-  StudentInfo,
-  StudentScore,
   allScore,
   examInfo,
+  CheckScoreInfo,
 } from "@/common/interfaces/response";
 import request from "@/utils/requests";
 
@@ -13,7 +10,6 @@ const commonUrl = "/dev";
 
 //发送注册信息
 export const sendRegisterInfo = (param: object) => {
-  console.log(param);
   return request.get<object>(`${commonUrl}/user/register`, { params: param });
 };
 
@@ -24,7 +20,15 @@ export const getAllExam = () => {
 
 //获取考试的所有学生成绩
 export const getAllScore = (param: object) => {
-  return request.get<allScore>(`${commonUrl}/score/oneexam`, {
-    params: param,
-  });
+  return request.get<allScore>(`${commonUrl}/score/oneexam`, { params: param });
+};
+
+//获取所有考试的查分请求
+export const getCheckScore = () => {
+  return request.get<CheckScoreInfo[]>(`${commonUrl}/check/get`);
+};
+
+//处理查分请求
+export const handleCheckScore = (param: object) => {
+  return request.get<object>(`${commonUrl}/check/dispose`, { params: param });
 };

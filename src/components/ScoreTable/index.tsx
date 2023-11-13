@@ -18,11 +18,11 @@ import {
 } from "@mui/material";
 import { visuallyHidden } from "@mui/utils";
 import { StudentScore } from "@/common/interfaces/response";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAppState } from "@/states";
 import { useQuery } from "react-query";
 import { getAllScore } from "@/apis/common";
-
+type PartialStudentScore = Omit<StudentScore, "student_number">;
 function createData(
   student_name: string,
   all: number,
@@ -31,9 +31,8 @@ function createData(
   english: number,
   physics: number,
   chemistry: number,
-  biology: number,
-
-): StudentScore {
+  biology: number
+): PartialStudentScore {
   return {
     student_name,
     all,
@@ -43,7 +42,6 @@ function createData(
     physics,
     chemistry,
     biology,
-
   };
 }
 
@@ -88,7 +86,7 @@ function stableSort<T>(
 
 interface HeadCell {
   disablePadding: boolean;
-  id: keyof StudentScore;
+  id: keyof PartialStudentScore;
   label: string;
   numeric: boolean;
 }
@@ -148,7 +146,7 @@ interface EnhancedTableProps {
   numSelected: number;
   onRequestSort: (
     event: React.MouseEvent<unknown>,
-    property: keyof StudentScore
+    property: keyof PartialStudentScore
   ) => void;
   onSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>) => void;
   order: Order;
@@ -166,7 +164,8 @@ function EnhancedTableHead(props: EnhancedTableProps) {
     onRequestSort,
   } = props;
   const createSortHandler =
-    (property: keyof StudentScore) => (event: React.MouseEvent<unknown>) => {
+    (property: keyof PartialStudentScore) =>
+    (event: React.MouseEvent<unknown>) => {
       onRequestSort(event, property);
     };
 
@@ -206,7 +205,7 @@ interface EnhancedTableToolbarProps {
 
 function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
   const { numSelected } = props;
-
+  const { state, dispatch } = useAppState();
   return (
     <Toolbar
       sx={{
@@ -227,27 +226,28 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
         id="tableTitle"
         component="div"
       >
-        成绩单
+        {state.selectedExam}·成绩单
       </Typography>
     </Toolbar>
   );
 }
 export default function ScoreTable() {
   const [order, setOrder] = useState<Order>("desc");
-  const [orderBy, setOrderBy] = useState<keyof StudentScore>("all");
+  const [orderBy, setOrderBy] = useState<keyof PartialStudentScore>("all");
   const [selected, setSelected] = useState<readonly number[]>([]);
   const [page, setPage] = useState(0);
   const [dense, setDense] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const { state, dispatch } = useAppState();
   const [rows, setRows] = useState([createData("", 0, 0, 0, 0, 0, 0, 0)]);
+
   const { data, refetch } = useQuery(
     //从state中获取exam_id，请求获得所有学生成绩
     ["getScore"],
-    () => getAllScore({exam_id:state.selectedExamId}),
+    () => getAllScore({ exam_id: state.selectedExamId }),
     {
       onSuccess: (data: any) => {
-        const newRows = data.allScore.map((srow: StudentScore) =>
+        const newRows = data.allScore.map((srow: PartialStudentScore) =>
           createData(
             srow.student_name,
             srow.all,
@@ -264,9 +264,13 @@ export default function ScoreTable() {
       },
     }
   );
+  React.useEffect(() => {
+    refetch();
+  }, [state.selectedExamId]);
+
   const handleRequestSort = (
     event: React.MouseEvent<unknown>,
-    property: keyof StudentScore
+    property: keyof PartialStudentScore
   ) => {
     const isAsc = orderBy === property && order === "asc";
     setOrder(isAsc ? "desc" : "asc");

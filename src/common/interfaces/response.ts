@@ -5,6 +5,7 @@ export type StudentInfo = {
 
 export type StudentScore = {
   student_name: string;
+  student_number: string;
   language: number;
   math: number;
   english: number;
@@ -40,9 +41,18 @@ export type accountInfo = {
 export type examInfo = {
   exam_name: string;
   exam_id: number;
+  exam_time: string;
 };
 
 export type Exam = {
   examInfo: examInfo;
   students: StudentScore[];
+};
+
+export type CheckScoreInfo = {
+  student_name: string;
+  student_number: string;
+  req_time: string;
+  exam_name: string;
+  exam_id: number;
 };
